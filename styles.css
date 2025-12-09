@@ -62,6 +62,82 @@ body {
     margin: 0 auto;
 }
 
+/* Mobile Sticky Navigation */
+.mobile-sticky-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    display: none;
+}
+
+.mobile-sticky-nav.visible {
+    transform: translateY(0);
+}
+
+.mobile-nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    max-width: 100vw;
+    gap: 0.75rem;
+}
+
+.mobile-nav-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mobile-nav-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--accent-primary);
+}
+
+.mobile-nav-dates {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    flex: 1;
+    min-width: 0;
+}
+
+.mobile-nav-dates::-webkit-scrollbar {
+    display: none;
+}
+
+.mobile-nav-dates .date-tab {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Show only on mobile */
+@media (max-width: 768px) {
+    .mobile-sticky-nav {
+        display: block;
+    }
+
+    body.nav-visible {
+        padding-top: 3rem;
+    }
+}
+
 /* Header */
 .header {
     text-align: center;
@@ -137,7 +213,7 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
 }
 
 .stat-card {
@@ -327,41 +403,114 @@ body {
     min-height: auto;
 }
 
-/* Date Navigation */
-.nav-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+/* Date Navigation Tabs */
+.date-tabs-container {
+    position: relative;
+    margin-top: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-card) var(--bg-secondary);
+}
+
+.date-tabs-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.date-tabs-container::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 2px;
+}
+
+.date-tabs-container::-webkit-scrollbar-thumb {
+    background: var(--bg-card);
+    border-radius: 2px;
+}
+
+.date-tabs {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    padding: 0.25rem 0;
+    min-width: 100%;
+}
+
+.date-tab {
+    padding: 0.5rem 1rem;
+    margin: 0 0.15rem;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--transition-normal);
+    white-space: nowrap;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
 }
 
-.nav-btn:hover {
+.date-tab:first-child {
+    margin-left: 0;
+}
+
+.date-tab:last-child {
+    margin-right: 0;
+}
+
+.date-tab:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.date-tab.active {
     background: var(--accent-primary);
-    border-color: var(--accent-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.nav-btn svg {
-    width: 20px;
-    height: 20px;
+.date-tab-slider {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: var(--accent-primary);
+    transition: all var(--transition-normal);
+    z-index: 1;
 }
 
-.date-display {
+.date-nav-card {
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.loading-dates {
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    color: var(--text-secondary);
+}
+
+.no-dates {
+    text-align: center;
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Loading states for better UX */
+.content-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
-    position: relative;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-secondary);
 }
 
-.date-display:hover .stat-value {
-    color: var(--accent-primary);
+.content-loading .loading-spinner {
+    margin-bottom: 1rem;
+}
+
+.date-tab.loading {
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 /* Footer */
@@ -383,26 +532,143 @@ body {
 }
 
 /* Responsive Design */
+
+/* Tablet and below */
+@media (max-width: 1024px) {
+    .masonry-grid {
+        column-count: 2;
+    }
+}
+
+/* Mobile devices */
 @media (max-width: 768px) {
     body {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-xs);
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    /* Header adjustments */
+    .header {
+        padding: var(--spacing-lg) 0;
+        margin-bottom: var(--spacing-md);
     }
 
     .header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .subtitle {
+        font-size: 0.9rem;
+    }
+
+    /* Single column masonry for mobile */
+    .masonry-grid {
+        column-count: 1;
+        column-gap: 0;
+    }
+
+    .masonry-item {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Stats grid - single column */
     .stats-grid {
         grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
     }
 
+    .stat-card {
+        padding: var(--spacing-sm);
+    }
+
+    /* Date navigation */
+    .date-nav-card {
+        padding: var(--spacing-sm);
+    }
+
+    .date-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .date-tabs-container {
+        margin-top: 0.25rem;
+    }
+
+    /* Hot topic */
     .hot-topic {
         flex-direction: column;
         align-items: flex-start;
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
     }
 
+    /* Tweet containers */
+    .tweet-embed-container {
+        padding: var(--spacing-sm);
+    }
+
+    /* Footer */
+    .footer {
+        padding: var(--spacing-md) 0;
+        font-size: 0.875rem;
+    }
+
+    .footer p {
+        font-size: 0.875rem;
+    }
+
+    .footer-note {
+        font-size: 0.8125rem;
+    }
+
+    /* Remove hover effects on mobile */
     .content-item:hover {
-        transform: translateX(4px);
+        transform: none;
+    }
+
+    .stat-card:hover {
+        transform: none;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.25rem;
+    }
+
+    .logo-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .date-tab {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .stat-icon svg {
+        width: 24px;
+        height: 24px;
     }
 }
 

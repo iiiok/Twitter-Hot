@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitter 热门内容监控 | AI编程话题日报</title>
-    <meta name="description" content="每日精选Twitter上最热门的AI编程相关内容，包括点赞数、浏览量和话题分析">
+    <title>🍌 Nano Banana Pro Prompt | Daily Highlights</title>
+    <meta name="description"
+        content="Daily curated content about nano banana pro prompt from Twitter, featuring trending discussions and insights">
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +14,23 @@
 </head>
 
 <body>
+    <!-- Sticky Mobile Navigation (hidden by default, shows on scroll) -->
+    <nav class="mobile-sticky-nav" id="mobileNav">
+        <div class="mobile-nav-content">
+            <div class="mobile-nav-title">
+                <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span>🍌 Nano Banana</span>
+            </div>
+            <div class="mobile-nav-dates" id="mobileNavDates">
+                <!-- Date tabs will be cloned here -->
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -23,33 +41,21 @@
                             d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    <h1>Twitter 热门内容监控</h1>
+                    <h1>🍌 Nano Banana Pro Prompt</h1>
                 </div>
-                <p class="subtitle">AI编程话题 · 每日精选</p>
+
             </div>
         </header>
 
         <!-- Stats Overview -->
         <div class="stats-grid">
             <!-- Date Navigation -->
-            <div class="stat-card date-nav-card" style="grid-column: 1 / -1; justify-content: space-between;">
-                <button id="prevDayBtn" class="nav-btn" title="前一天">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                </button>
-
-                <div class="date-display">
-                    <div class="stat-label" style="text-align: center;">当前快照</div>
-                    <div class="stat-value" id="currentDateDisplay">2025-12-04</div>
-                    <input type="date" id="datePicker" style="position:absolute;opacity:0;pointer-events:none;">
+            <div class="stat-card date-nav-card" style="grid-column: 1 / -1;">
+                <div class="date-tabs-container">
+                    <div class="date-tabs" id="dateTabs">
+                        <!-- Date tabs will be dynamically inserted here -->
+                    </div>
                 </div>
-
-                <button id="nextDayBtn" class="nav-btn" title="后一天">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 18l6-6-6-6" />
-                    </svg>
-                </button>
             </div>
         </div>
 
@@ -66,17 +72,17 @@
                     <path
                         d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                 </svg>
-                <p>该日期暂无数据</p>
-                <p style="font-size: 0.9rem; margin-top: 0.5rem;">请在后台发布内容</p>
+                <p>No data available for this date</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Please publish content from admin panel</p>
             </div>
         </div>
 
         <!-- Footer -->
         <footer class="footer">
-            <p>数据来源：Grok AI 分析 | 每日更新</p>
+            <p>Daily Updates</p>
             <p class="footer-note">
                 <a href="admin.html" target="_blank"
-                    style="color: inherit; text-decoration: none; opacity: 0.5;">管理后台</a>
+                    style="color: inherit; text-decoration: none; opacity: 0.5;">Admin</a>
             </p>
         </footer>
     </div>
@@ -84,6 +90,12 @@
     <script src="script.js"></script>
     <!-- Twitter Widget Script for Embedded Tweets -->
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+    <!-- Vercel Analytics -->
+    <script>
+        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,52 @@
+/* Twitter Hot Content Quick Add - Content Styles */
+
+/* Menu item cursor */
+.hot-content-menu-item {
+    cursor: pointer !important;
+}
+
+/* Notification toast */
+.hot-content-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background: rgb(29, 155, 240);
+    color: white;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.hot-content-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hot-content-notification.success {
+    background: rgb(0, 186, 124);
+}
+
+.hot-content-notification.error {
+    background: rgb(244, 33, 46);
+}
+
+.hot-content-notification.info {
+    background: rgb(29, 155, 240);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hot-content-notification {
+        right: 10px;
+        top: 10px;
+        font-size: 13px;
+    }
+}

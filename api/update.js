@@ -48,25 +48,49 @@ module.exports = async (req, res) => {
   }
 
   const date = payload.date || '';
-  const urls = payload.urls || [];
+  const newUrls = payload.urls || [];
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Array.isArray(urls)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Array.isArray(newUrls)) {
     res.status(400).json({ error: 'bad_request' });
     return;
   }
 
   try {
+    // 首先检查是否已有该日期的数据
+    const existingData = await pool.query(
+      'SELECT urls FROM daily_tweets WHERE date = $1',
+      [date]
+    );
+    
+    let finalUrls = newUrls;
+    
+    // 如果已有数据，则合并链接（去重）
+    if (existingData.rows.length > 0) {
+      const existingUrls = existingData.rows[0].urls || [];
+      // 合并现有链接和新链接，并去重
+      const mergedUrls = [...existingUrls, ...newUrls];
+      finalUrls = [...new Set(mergedUrls)]; // 使用Set进行去重
+      
+      console.log(`Merging ${newUrls.length} new URLs with ${existingUrls.length} existing URLs for date ${date}`);
+    } else {
+      console.log(`Creating new entry with ${newUrls.length} URLs for date ${date}`);
+    }
+    
     // 使用 UPSERT 语法（ON CONFLICT）来插入或更新数据
     const result = await pool.query(
       `INSERT INTO daily_tweets (date, urls) 
        VALUES ($1, $2) 
        ON CONFLICT (date) 
        DO UPDATE SET urls = $2, created_at = CURRENT_TIMESTAMP`,
-      [date, JSON.stringify(urls)]
+      [date, JSON.stringify(finalUrls)]
     );
 
-    console.log(`Successfully saved ${urls.length} URLs for date ${date}`);
-    res.json({ ok: true });
+    res.json({ 
+      ok: true, 
+      message: `成功保存 ${finalUrls.length} 个链接（新增 ${newUrls.length} 个）`,
+      totalUrls: finalUrls.length,
+      newUrls: newUrls.length
+    });
   } catch (error) {
     console.error('Database save error:', error);
     res.status(500).json({ error: 'database_error', details: error.message });

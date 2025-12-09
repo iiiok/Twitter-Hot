@@ -7,6 +7,11 @@ function extractTweetId(url) {
 // Render content items in masonry layout
 function renderContent() {
     const contentList = document.getElementById('contentList');
+    if (!contentList) {
+        // Not on the main page, so don't proceed
+        return;
+    }
+
     contentList.className = 'masonry-grid';
 
     tweetUrls.forEach((url, index) => {
@@ -18,7 +23,7 @@ function renderContent() {
             <div class="tweet-embed-container" id="tweet-container-${index}">
                 <div class="tweet-loading">
                     <div class="loading-spinner"></div>
-                    <span>加载推文中...</span>
+                    <span>Loading tweet...</span>
                 </div>
                 <div id="tweet-target-${index}"></div>
             </div>
@@ -37,7 +42,7 @@ function loadTweet(url, container, index) {
     const tweetId = extractTweetId(url);
 
     if (!tweetId) {
-        container.innerHTML = '<p class="tweet-error">无法加载推文预览</p>';
+        container.innerHTML = '<p class="tweet-error">Unable to load tweet</p>';
         container.classList.add('loaded');
         return;
     }
@@ -60,14 +65,14 @@ function loadTweet(url, container, index) {
         ).then(function (el) {
             // Remove loading spinner after tweet loads
             if (loading) {
-                loading.style.display = 'none';
+                loading.remove();
             }
             if (el) {
                 container.classList.add('loaded');
                 // Ensure proper alignment after loading
                 container.parentElement.style.alignSelf = 'flex-start';
             } else {
-                container.innerHTML = '<p class="tweet-error">推文加载失败，可能已被删除或受限</p>';
+                container.innerHTML = '<p class="tweet-error">Tweet failed to load</p>';
                 container.classList.add('loaded');
             }
         });
@@ -89,7 +94,7 @@ function loadTweet(url, container, index) {
         setTimeout(() => {
             clearInterval(checkTwitter);
             if (!container.classList.contains('loaded') && container.querySelector('.tweet-loading')) {
-                container.innerHTML = '<p class="tweet-error">推文加载超时，请点击下方链接查看原文</p>';
+                container.innerHTML = '<p class="tweet-error">Tweet loading timeout</p>';
             }
         }, 10000);
     }
@@ -98,71 +103,246 @@ function loadTweet(url, container, index) {
 // Global State
 const params = new URLSearchParams(window.location.search);
 const paramDate = params.get('date');
-let currentDate = (paramDate && /^\d{4}-\d{2}-\d{2}$/.test(paramDate)) ? paramDate : new Date().toISOString().split('T')[0];
+let currentDate = (paramDate && /^\d{4}-\d{2}-\d{2}$/.test(paramDate)) ? paramDate : null; // Will be set to latest date if null
 const tweetUrls = [];
+let availableDates = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Only run frontend logic if we are on the main page
+    // Check if we are on the main page (index.html)
     if (document.getElementById('contentList')) {
-        setupDateNavigation();
-        loadContentForDate(currentDate);
+        setupDateTabsNavigation();
+        loadAvailableDates();
+        // Only load content if currentDate is already set (from URL parameter)
+        // Otherwise, loadAvailableDates will set it to the latest date and load content
+        if (currentDate) {
+            loadContentForDate(currentDate);
+        }
         addEntranceAnimation();
+        setupMobileStickyNav();
+    }
+
+    // Check if we are on the admin page (admin.html)
+    if (document.getElementById('publishBtn')) {
+        // Admin page initialization is handled inline in admin.html
+        // No additional initialization needed here
     }
 });
 
+// Setup Mobile Sticky Navigation
+function setupMobileStickyNav() {
+    const mobileNav = document.getElementById('mobileNav');
+    if (!mobileNav) return;
+
+    let lastScroll = 0;
+    const scrollThreshold = 200; // Show nav after scrolling 200px
+
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+
+        if (currentScroll > scrollThreshold) {
+            mobileNav.classList.add('visible');
+            document.body.classList.add('nav-visible');
+        } else {
+            mobileNav.classList.remove('visible');
+            document.body.classList.remove('nav-visible');
+        }
+
+        lastScroll = currentScroll;
+    });
+}
+
+// Sync date tabs to mobile navigation
+function syncMobileNavDates() {
+    const mobileNavDates = document.getElementById('mobileNavDates');
+    const mainDateTabs = document.getElementById('dateTabs');
+
+    if (!mobileNavDates || !mainDateTabs) return;
+
+    // Clone the date tabs to mobile nav
+    mobileNavDates.innerHTML = mainDateTabs.innerHTML;
+
+    // Add click event listeners to mobile nav tabs
+    mobileNavDates.querySelectorAll('.date-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const date = tab.getAttribute('data-date');
+            currentDate = date;
+            selectDateTab(date);
+            loadContentForDate(date);
+
+            // Update URL parameter
+            const url = new URL(window.location);
+            url.searchParams.set('date', date);
+            window.history.replaceState({}, '', url);
+
+            // Sync selection in mobile nav
+            syncMobileNavSelection(date);
+        });
+    });
+
+    // Sync initial selection
+    syncMobileNavSelection(currentDate);
+}
+
+// Sync selected date in mobile nav
+function syncMobileNavSelection(date) {
+    const mobileNavDates = document.getElementById('mobileNavDates');
+    if (!mobileNavDates) return;
+
+    mobileNavDates.querySelectorAll('.date-tab').forEach(tab => {
+        if (tab.getAttribute('data-date') === date) {
+            tab.classList.add('active');
+            // Scroll tab into view
+            tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+}
+
+// Load all available dates from server
+function loadAvailableDates() {
+    // First check if we're on the main page
+    const dateTabsContainer = document.getElementById('dateTabs');
+    if (!dateTabsContainer) {
+        // Not on the main page, so don't proceed
+        return;
+    }
+
+    dateTabsContainer.innerHTML = '<div class="loading-dates">Loading dates...</div>';
+
+    // Add retry mechanism
+    const fetchDates = (retryCount = 0) => {
+        fetch('/api/dates')
+            .then(r => r.ok ? r.json() : Promise.reject())
+            .then(data => {
+                availableDates = data.dates || [];
+
+                // If no date is set (no URL parameter), default to the latest available date
+                if (!currentDate && availableDates.length > 0) {
+                    currentDate = availableDates[0].date; // Dates are sorted newest first
+
+                    // Update URL parameter to reflect the selected date
+                    const url = new URL(window.location);
+                    url.searchParams.set('date', currentDate);
+                    window.history.replaceState({}, '', url);
+                }
+
+                renderDateTabs();
+                selectDateTab(currentDate);
+
+                // Load content for the current date (which is now the latest if it was null)
+                if (currentDate) {
+                    loadContentForDate(currentDate);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading dates:', error);
+                if (retryCount < 2) {
+                    // Retry after 1 second
+                    setTimeout(() => fetchDates(retryCount + 1), 1000);
+                } else {
+                    dateTabsContainer.innerHTML = '<div class="no-dates">Failed to load dates. Please refresh.</div>';
+                }
+            });
+    };
+
+    fetchDates();
+}
+
+// Render date tabs
+function renderDateTabs() {
+    const dateTabsContainer = document.getElementById('dateTabs');
+
+    if (availableDates.length === 0) {
+        dateTabsContainer.innerHTML = '<div class="no-dates">No dates available</div>';
+        return;
+    }
+
+    dateTabsContainer.innerHTML = availableDates.map(dateInfo => {
+        // Format date for display (e.g., 12/05)
+        const date = new Date(dateInfo.date);
+        const formattedDate = `${date.getMonth() + 1}/${date.getDate()}`;
+
+        return `
+            <div class="date-tab" data-date="${dateInfo.date}">
+                <div>${formattedDate}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Add click event listeners to tabs
+    document.querySelectorAll('.date-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const date = tab.getAttribute('data-date');
+            currentDate = date;
+            selectDateTab(date);
+            loadContentForDate(date);
+
+            // Update URL parameter
+            const url = new URL(window.location);
+            url.searchParams.set('date', date);
+            window.history.replaceState({}, '', url);
+
+            // Sync mobile nav selection
+            syncMobileNavSelection(date);
+        });
+    });
+
+    // Sync date tabs to mobile navigation
+    syncMobileNavDates();
+}
+
+// Highlight the active date tab
+function selectDateTab(date) {
+    let foundTab = false;
+
+    // First check if date tabs exist on the current page
+    const dateTabs = document.querySelectorAll('.date-tab');
+    if (dateTabs.length === 0) {
+        return false;
+    }
+
+    dateTabs.forEach(tab => {
+        if (tab.getAttribute('data-date') === date) {
+            tab.classList.add('active');
+            // Scroll tab into view if needed
+            tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            foundTab = true;
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+
+    // If no tab found for the date, it might be a date with no content
+    // In this case, don't throw an error, just continue
+    return foundTab;
+}
+
 // Setup Date Navigation
-function setupDateNavigation() {
-    const prevBtn = document.getElementById('prevDayBtn');
-    const nextBtn = document.getElementById('nextDayBtn');
-    const dateDisplay = document.getElementById('currentDateDisplay');
-    const datePicker = document.getElementById('datePicker');
-
-    // Update display
-    const updateDisplay = () => {
-        dateDisplay.textContent = currentDate;
-        datePicker.value = currentDate;
-
-        // Disable next button if date is today
-        const today = new Date().toISOString().split('T')[0];
-        nextBtn.style.opacity = currentDate >= today ? '0.5' : '1';
-        nextBtn.style.pointerEvents = currentDate >= today ? 'none' : 'auto';
-    };
-
-    // Change date
-    const changeDate = (offset) => {
-        const date = new Date(currentDate);
-        date.setDate(date.getDate() + offset);
-        currentDate = date.toISOString().split('T')[0];
-        updateDisplay();
-        loadContentForDate(currentDate);
-    };
-
-    prevBtn.addEventListener('click', () => changeDate(-1));
-    nextBtn.addEventListener('click', () => changeDate(1));
-
-    // Date picker interaction
-    dateDisplay.parentElement.addEventListener('click', () => {
-        datePicker.showPicker();
-    });
-
-    datePicker.addEventListener('change', (e) => {
-        currentDate = e.target.value;
-        updateDisplay();
-        loadContentForDate(currentDate);
-    });
-
-    updateDisplay();
+function setupDateTabsNavigation() {
+    // This function is now handled by the date tabs themselves
+    // Keeping for compatibility
 }
 
 // Load content for specific date
 function loadContentForDate(date) {
-    const storageKey = `tweets_${date}`;
+    // First check if we're on the main page
     const contentList = document.getElementById('contentList');
     const emptyState = document.getElementById('emptyState');
-    contentList.innerHTML = '';
+
+    if (!contentList) {
+        // Not on the main page, so don't proceed
+        return;
+    }
+
+    // Show loading state
+    contentList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">Loading content...</div>';
+    emptyState.style.display = 'none';
     tweetUrls.length = 0;
+
     const url = `/api/data?date=${encodeURIComponent(date)}`;
+
     fetch(url)
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(data => {
@@ -172,8 +352,13 @@ function loadContentForDate(date) {
                 renderContent();
                 emptyState.style.display = 'none';
                 localStorage.setItem(storageKey, JSON.stringify(urls));
+
+                // Update date tab selection
+                selectDateTab(date);
                 return;
             }
+
+            // Try to load from localStorage as fallback
             const savedData = localStorage.getItem(storageKey);
             if (savedData) {
                 try {
@@ -182,13 +367,24 @@ function loadContentForDate(date) {
                         tweetUrls.push(...u);
                         renderContent();
                         emptyState.style.display = 'none';
+
+                        // Update date tab selection
+                        selectDateTab(date);
                         return;
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
+
+            // Show empty state
+            contentList.innerHTML = '';
             emptyState.style.display = 'block';
+
+            // Still update the selected tab even if no content
+            selectDateTab(date);
         })
-        .catch(() => {
+        .catch(error => {
+            console.error('Error loading content for date:', date, error);
+
             const savedData = localStorage.getItem(storageKey);
             if (savedData) {
                 try {
@@ -197,11 +393,20 @@ function loadContentForDate(date) {
                         tweetUrls.push(...u);
                         renderContent();
                         emptyState.style.display = 'none';
+
+                        // Update date tab selection
+                        selectDateTab(date);
                         return;
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
-            emptyState.style.display = 'block';
+
+            // Show error state
+            contentList.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">Failed to load. Please refresh.</div>';
+            emptyState.style.display = 'none';
+
+            // Still update the selected tab even if no content
+            selectDateTab(date);
         });
 }
 
@@ -211,14 +416,29 @@ function saveDailySnapshot(date, urls) {
     const body = JSON.stringify({ date, urls });
     return fetch('/api/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
         .then(r => {
-            const ok = r.ok;
-            return (ok ? r.json() : Promise.reject()).then(() => ok);
+            if (!r.ok) return Promise.reject();
+            return r.json();
         })
-        .then(ok => {
-            localStorage.setItem(storageKey, JSON.stringify(urls));
-            return { remoteSaved: ok };
+        .then(responseData => {
+            // 获取最新的URL列表，确保本地缓存与服务器同步
+            // 这里我们重新获取数据，因为合并后的完整URL列表只在服务器端
+            return fetch(`/api/data?date=${encodeURIComponent(date)}`)
+                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(data => {
+                    const finalUrls = Array.isArray(data && data.urls) ? data.urls : urls;
+
+                    // 更新本地缓存
+                    localStorage.setItem(storageKey, JSON.stringify(finalUrls));
+
+                    return {
+                        remoteSaved: true,
+                        totalUrls: responseData.totalUrls,
+                        newUrls: responseData.newUrls
+                    };
+                });
         })
         .catch(() => {
+            // 降级处理：只保存本次提交的URL
             localStorage.setItem(storageKey, JSON.stringify(urls));
             return { remoteSaved: false };
         });
@@ -233,6 +453,13 @@ function extractUrls(text) {
 // Render content items in masonry layout
 function renderContent() {
     const contentList = document.getElementById('contentList');
+    if (!contentList) {
+        // Not on the main page, so don't proceed
+        return;
+    }
+
+    // Clear any existing content (including loading text)
+    contentList.innerHTML = '';
     contentList.className = 'masonry-grid';
 
     tweetUrls.forEach((url, index) => {
@@ -244,7 +471,7 @@ function renderContent() {
             <div class="tweet-embed-container" id="tweet-container-${index}">
                 <div class="tweet-loading">
                     <div class="loading-spinner"></div>
-                    <span>加载推文中...</span>
+                    <span>Loading tweet...</span>
                 </div>
                 <div id="tweet-target-${index}"></div>
             </div>

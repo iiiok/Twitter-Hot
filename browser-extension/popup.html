@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Hot Content Quick Add</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #15202b;
+            color: #ffffff;
+            padding: 16px;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: #1d9bf0;
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8b98a5;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: #192734;
+            border: 1px solid #38444d;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1d9bf0;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 16px;
+            background: #1d9bf0;
+            border: none;
+            border-radius: 9999px;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1a8cd8;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.success {
+            background: rgba(0, 186, 124, 0.1);
+            color: #00ba7c;
+            border: 1px solid rgba(0, 186, 124, 0.3);
+        }
+
+        .status.error {
+            background: rgba(244, 33, 46, 0.1);
+            color: #f4212e;
+            border: 1px solid rgba(244, 33, 46, 0.3);
+        }
+
+        .info-box {
+            background: rgba(29, 155, 240, 0.1);
+            border: 1px solid rgba(29, 155, 240, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: #8b98a5;
+            line-height: 1.5;
+        }
+
+        .divider {
+            height: 1px;
+            background: #38444d;
+            margin: 16px 0;
+        }
+
+        .quick-add-section {
+            margin-top: 16px;
+        }
+
+        .footer {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 11px;
+            color: #536471;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>
+        <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        </svg>
+        Hot Content Quick Add
+    </h1>
+
+    <div class="section">
+        <label for="apiEndpoint">API Endpoint</label>
+        <input type="url" id="apiEndpoint" placeholder="https://twitterhot.vercel.app/api/update"
+            value="https://twitterhot.vercel.app/api/update">
+    </div>
+
+    <button id="saveSettings">Save Settings</button>
+    <div id="saveStatus" class="status"></div>
+
+    <div class="divider"></div>
+
+    <div class="quick-add-section">
+        <div class="section">
+            <label for="manualUrl">Quick Add URL</label>
+            <input type="url" id="manualUrl" placeholder="https://x.com/user/status/123456789">
+        </div>
+        <button id="quickAdd">Add to Collection</button>
+        <div id="addStatus" class="status"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="info-box">
+        💡 <strong>How to use:</strong><br>
+        Browse Twitter/X and click the "Add to Hot" button on any tweet you want to save to your collection.
+    </div>
+
+    <div class="footer">
+        v1.0.0 • Made with ❤️
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>
