@@ -395,15 +395,6 @@ function loadContentForDate(date) {
         return;
     }
 
-    try {
-        fetch('/api/pv', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ date }),
-            keepalive: true
-        });
-    } catch (e) { }
-
     // Define storage key for this date
     const storageKey = `tweets_${date}`;
 
@@ -430,7 +421,8 @@ function loadContentForDate(date) {
         .then(data => {
             const urls = Array.isArray(data && data.urls) ? data.urls : [];
             if (urls.length > 0) {
-                tweetUrls.push(...urls);
+                // Reverse array to show newest content first
+                tweetUrls.push(...urls.reverse());
                 renderContent();
                 emptyState.style.display = 'none';
                 localStorage.setItem(storageKey, JSON.stringify(urls));
@@ -446,7 +438,8 @@ function loadContentForDate(date) {
                 try {
                     const u = JSON.parse(savedData);
                     if (Array.isArray(u) && u.length > 0) {
-                        tweetUrls.push(...u);
+                        // Reverse array to show newest content first
+                        tweetUrls.push(...u.reverse());
                         renderContent();
                         emptyState.style.display = 'none';
 
@@ -472,7 +465,8 @@ function loadContentForDate(date) {
                 try {
                     const u = JSON.parse(savedData);
                     if (Array.isArray(u) && u.length > 0) {
-                        tweetUrls.push(...u);
+                        // Reverse array to show newest content first
+                        tweetUrls.push(...u.reverse());
                         renderContent();
                         emptyState.style.display = 'none';
 
@@ -498,14 +492,25 @@ function saveDailySnapshot(date, urls) {
     const body = JSON.stringify({ date, urls });
     return fetch('/api/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
         .then(r => {
-            if (!r.ok) return Promise.reject();
+            if (!r.ok) return Promise.reject(new Error('Update failed'));
             return r.json();
         })
         .then(responseData => {
             // 获取最新的URL列表，确保本地缓存与服务器同步
             // 这里我们重新获取数据，因为合并后的完整URL列表只在服务器端
             return fetch(`/api/data?date=${encodeURIComponent(date)}`)
-                .then(r => r.ok ? r.json() : Promise.reject())
+                .then(r => {
+                    if (!r.ok) {
+                        throw new Error(`HTTP error! status: ${r.status}`);
+                    }
+                    // Check if response is JSON
+                    const contentType = r.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return r.json();
+                    } else {
+                        throw new Error('Response is not JSON');
+                    }
+                })
                 .then(data => {
                     const finalUrls = Array.isArray(data && data.urls) ? data.urls : urls;
 
