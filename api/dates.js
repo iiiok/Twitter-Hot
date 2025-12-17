@@ -2,7 +2,8 @@ const { Pool } = require('pg');
 
 // 从环境变量获取数据库连接信息
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
+  // connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URL,
+    connectionString: process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL,
   ssl: {
     rejectUnauthorized: false
   }
