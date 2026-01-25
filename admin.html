@@ -4,218 +4,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>发布后台 | Twitter 热门监控</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .admin-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .admin-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 0.75rem;
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
-        textarea.form-control {
-            height: 300px;
-            font-family: monospace;
-            resize: vertical;
-        }
-
-        .btn-block {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .status-message {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            display: none;
-        }
-
-        .status-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .preview-list {
-            margin-top: 1rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 1rem;
-        }
-
-        .preview-item {
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-        }
-    </style>
+    <title>Content Xiliy Studio | Nano Banana</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <!-- Serif Design System Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 
 <body>
-    <div class="admin-container">
-        <header class="header">
-            <h1>🚀 内容发布后台</h1>
-            <p class="subtitle">Twitter 热门内容每日更新</p>
-        </header>
-
-        <div class="admin-card">
-            <div class="form-group">
-                <label for="publishDate">发布日期</label>
-                <input type="date" id="publishDate" class="form-control">
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand-area">
+                <span class="brand-title">Nano Banana</span>
+                <span class="brand-subtitle">Xiliy Studio</span>
             </div>
 
-            <div class="form-group">
-                <label for="rawContent">原始内容 (粘贴 Grok 文本)</label>
-                <textarea id="rawContent" class="form-control" placeholder="在此粘贴包含 Twitter 链接的文本..."></textarea>
-            </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-section import-section">
+                    <div class="sidebar-label">Import Content</div>
+                    <div class="form-group">
+                        <label for="rawContent">Twitter Links</label>
+                        <textarea id="rawContent" class="form-control"
+                            placeholder="Paste Twitter links or Grok output here..."></textarea>
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <div id="previewArea" style="display: none;">
-                    <label>识别到的链接 (<span id="linkCount">0</span> 条)</label>
-                    <div id="linkList" class="preview-list"></div>
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Quick Delete</div>
+                    <div class="form-group">
+                        <label for="deleteUrlInput">Tweet URL or ID</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="deleteUrlInput" class="form-control" placeholder="URL or ID (e.g. 2013632638666580186)"
+                                style="min-height: 36px;">
+                            <button id="quickDeleteBtn" class="primary-btn"
+                                style="background: transparent; color: var(--muted-foreground); border: 1px solid var(--border); padding: 0 12px;"
+                                title="Delete Item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-label">Navigation</div>
+                    <a id="frontLink" href="index.html" target="_blank" class="content-link">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                        </svg>
+                        View Live Site
+                    </a>
+                </div>
+            </nav>
+
+        </aside>
+
+        <!-- Floating Action Button for Publish -->
+        <button id="publishBtn" class="fab-publish primary-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Publish Updates
+        </button>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Fixed Top Bar for Import Controls -->
+            <div class="content-top-bar">
+                <div class="top-bar-container">
+                    <div class="top-bar-header">
+                        <div class="top-bar-left">
+                            <div class="top-bar-preview-info">
+                                <div class="top-bar-preview-title">Content Preview</div>
+                            </div>
+                        </div>
+                        <div class="top-bar-center">
+                            <input type="date" id="publishDate" class="form-control">
+                            <button id="loadDataBtn" class="primary-btn">Load Cloud Data</button>
+                            <div id="statusMsg" class="status-message"></div>
+                        </div>
+                        <div class="top-bar-controls">
+                            <!-- Theme Toggle (Compact) -->
+                            <button id="themeToggleCompact" class="theme-toggle-compact" aria-label="Toggle theme"
+                                title="Toggle theme">
+                                <svg id="themeIconCompact" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <!-- Sun icon (default for dark mode) -->
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Preview Mode Toggle (Compact) -->
+                            <div class="preview-mode-compact">
+                                <input type="radio" name="previewMode" id="modeStandardTop" value="standard" checked>
+                                <label for="modeStandardTop">Standard</label>
+                                <input type="radio" name="previewMode" id="modeImagesTop" value="images">
+                                <label for="modeImagesTop">Images</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <button id="publishBtn" class="primary-btn btn-block">发布更新</button>
+            <div class="main-container">
+                <div class="preview-toolbar">
+                    <div class="preview-count-info">
+                        Detected <span id="linkCount" class="preview-count-number">0</span> links
+                    </div>
+                    <label class="select-all-wrap">
+                        <input type="checkbox" id="selectAll" checked> Select All
+                    </label>
+                </div>
 
-            <div id="statusMsg" class="status-message"></div>
-        </div>
-
-        <div style="text-align: center; margin-top: 2rem;">
-            <a id="frontLink" href="index.html" target="_blank" class="content-link">查看前台效果 &rarr;</a>
-        </div>
+                <div id="linkList" class="masonry-preview"></div>
+                <div id="linkListImages" class="image-mode-grid" style="display: none;"></div>
+            </div>
+    </div>
+    </main>
     </div>
 
-    <script src="script.js"></script>
-    <script>
-        // Admin specific logic
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('publishDate').value = today;
-            const frontLink = document.getElementById('frontLink');
-            frontLink.href = 'index.html?date=' + today;
-
-            const textarea = document.getElementById('rawContent');
-            const publishBtn = document.getElementById('publishBtn');
-            const statusMsg = document.getElementById('statusMsg');
-
-            // Auto-detect links on input
-            textarea.addEventListener('input', () => {
-                const urls = extractUrls(textarea.value);
-                updatePreview(urls);
-            });
-
-            document.getElementById('publishDate').addEventListener('change', () => {
-                const d = document.getElementById('publishDate').value;
-                if (d) frontLink.href = 'index.html?date=' + d;
-            });
-
-            // Publish action
-            publishBtn.addEventListener('click', async () => {
-                const date = document.getElementById('publishDate').value;
-                const urls = extractUrls(textarea.value);
-                const d = (date || '').trim();
-                const okDate = /^\d{4}-\d{2}-\d{2}$/.test(d);
-
-                if (!date) {
-                    showStatus('请选择发布日期', 'error');
-                    return;
-                }
-
-                if (!okDate) {
-                    showStatus('发布日期格式需为 YYYY-MM-DD', 'error');
-                    return;
-                }
-
-                if (urls.length === 0) {
-                    showStatus('未检测到任何 Twitter 链接', 'error');
-                    return;
-                }
-
-                const result = await saveDailySnapshot(d, urls);
-                if (result && result.remoteSaved) {
-                    let message = `✅ 已同步服务器并发布 ${d} 的内容`;
-                    
-                    // 如果有详细信息，显示更详细的状态
-                    if (result.totalUrls !== undefined) {
-                        message += `，共 ${result.totalUrls} 条链接`;
-                        if (result.newUrls !== undefined && result.newUrls < result.totalUrls) {
-                            message += `（新增 ${result.newUrls} 条，${result.totalUrls - result.newUrls} 条为去重后的已存在链接）`;
-                        }
-                    } else {
-                        message += `，${urls.length} 条链接`;
-                    }
-                    
-                    showStatus(message, 'success');
-                } else {
-                    showStatus(`⚠️ 已更新本地缓存，但服务器存储未生效`, 'error');
-                }
-
-                // Optional: Clear input
-                // textarea.value = '';
-            });
-        });
-
-        function updatePreview(urls) {
-            const previewArea = document.getElementById('previewArea');
-            const linkCount = document.getElementById('linkCount');
-            const linkList = document.getElementById('linkList');
-
-            if (urls.length > 0) {
-                previewArea.style.display = 'block';
-                linkCount.textContent = urls.length;
-                linkList.innerHTML = urls.map((url, i) => `
-                    <div class="preview-item">
-                        <span>#${i + 1}</span>
-                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:10px;">${url}</span>
-                    </div>
-                `).join('');
-            } else {
-                previewArea.style.display = 'none';
-            }
-        }
-
-        function showStatus(msg, type) {
-            const el = document.getElementById('statusMsg');
-            el.textContent = msg;
-            el.style.display = 'block';
-            el.className = 'status-message ' + (type === 'success' ? 'status-success' : '');
-        }
-    </script>
+    <!-- Keep app-core if it provides specific utilities, otherwise it might be redundant with admin-core.js -->
+    <!-- It seems app-core.js was imported before. Keeping it for safety unless specified otherwise. -->
+    <script src="app-core.js"></script>
+    <script src="js/admin-core.js"></script>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
 
 </html>
