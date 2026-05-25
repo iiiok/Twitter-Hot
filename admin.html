@@ -32,15 +32,25 @@
                         <textarea id="rawContent" class="form-control"
                             placeholder="Paste Twitter links or Grok output here..."></textarea>
                     </div>
+                    <div class="sidebar-label">Quick Add</div>
+                    <button id="quickAddBtn" class="primary-btn"
+                        style="background: transparent; color: var(--muted-foreground); border: 1px solid var(--border); padding: 0 12px;"
+                        title="Quick Add Item">
+                        <!-- changed: use a plus/add icon -->
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
-
                 <div class="sidebar-section">
                     <div class="sidebar-label">Quick Delete</div>
                     <div class="form-group">
                         <label for="deleteUrlInput">Tweet URL or ID</label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="text" id="deleteUrlInput" class="form-control" placeholder="URL or ID (e.g. 2013632638666580186)"
-                                style="min-height: 36px;">
+                            <input type="text" id="deleteUrlInput" class="form-control"
+                                placeholder="URL or ID (e.g. 2013632638666580186)" style="min-height: 36px;">
                             <button id="quickDeleteBtn" class="primary-btn"
                                 style="background: transparent; color: var(--muted-foreground); border: 1px solid var(--border); padding: 0 12px;"
                                 title="Delete Item">
